@@ -1,0 +1,41 @@
+name: TR WinRM
+version: 0.0.5
+rundeckPluginVersion: 1.0
+author: dhruv.ahuja
+date: 2015-05-07
+providers:
+  - name: tr-winrm-ne
+    title: TR WinRM
+    service: NodeExecutor
+    plugin-type: script
+    script-file: node-executor.rb
+    script-interpreter: /opt/tr-rundeck-winrm-plugin/bin/ruby
+    script-args: "-h '${node.hostname}' -u '${node.username}' -p '${option.winrmPassword}' -c '${exec.command}'"
+    config:
+      - name: operation_timeout
+        title: WS-Management OperationTimeout
+        description: in seconds
+        type: Integer
+        required: true
+        default: 60
+      - name: invocation_string
+        title: Powershell Invocation String
+        description: 'to be used as "Get-Content <script.ps1> | <invocation_string> -"'
+        type: String
+        required: true
+        default: 'powershell -noprofile -noninteractive'
+  - name: tr-winrm-fc
+    title: TR WinRM
+    service: FileCopier
+    plugin-type: script
+    script-file: file-copier.rb
+    script-interpreter: /opt/tr-rundeck-winrm-plugin/bin/ruby
+    script-args: '-h "${node.hostname}" -u "${node.username}" -p "${option.winrmPassword}" -s "${file-copy.file}" -t "${file-copy.destination}"'
+    config:
+      - name: operation_timeout
+        title: WS-Management OperationTimeout
+        description: in seconds
+        type: Integer
+        required: true
+        default: 60
+
