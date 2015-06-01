@@ -22,9 +22,11 @@ def rdjobs2tree
   xml_tree = REXML::Document.new(project_jobs)
   
   xml_tree.elements.each('/joblist/job') { |xml_job|
-    if xml_job.elements['group'] and ! tree.has_key?(xml_job.elements['group'].text)
+    if xml_job.elements['group']
       jobdir = xml_job.elements['group'].text
-      tree[jobdir] = Hash.new
+      if ! tree.has_key?(xml_job.elements['group'].text)
+        tree[jobdir] = Hash.new
+      end
     else
       jobdir = '/'
     end
