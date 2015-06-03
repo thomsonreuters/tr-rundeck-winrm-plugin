@@ -30,7 +30,10 @@ su --login packager --command="cd ruby-${var_ruby_version} && make install"
 
 su --login packager --command="export PATH=${var_prefix}/bin:${PATH} && gem install --no-document winrm-fs"
 
-zip -9 -r tr-rundeck-winrm-plugin.zip src/
+rm --force /tmp/tr-rundeck-winrm-plugin.zip
+cd src/
+zip -9 -r /tmp/tr-rundeck-winrm-plugin.zip tr-rundeck-winrm-plugin/
+cd ../
 
 mv tr-rundeck-winrm-plugin.zip ${var_rundeck_libext}
 
