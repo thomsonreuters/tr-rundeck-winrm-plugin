@@ -35,7 +35,7 @@ cd src/
 zip -9 -r /tmp/tr-rundeck-winrm-plugin.zip tr-rundeck-winrm-plugin/
 cd ../
 
-mv tr-rundeck-winrm-plugin.zip ${var_rundeck_libext}
+mv /tmp/tr-rundeck-winrm-plugin.zip ${var_rundeck_libext}
 
 for _file in ext/*; do var_bins="${var_bins} ${var_bin_path}/$(basename ${_file})"; done;
 
