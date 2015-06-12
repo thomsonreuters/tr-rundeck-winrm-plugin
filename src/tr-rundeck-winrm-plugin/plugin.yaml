@@ -1,8 +1,8 @@
 name: TR WinRM
-version: 0.1.2
+version: 0.2.0
 rundeckPluginVersion: 1.0
 author: dhruv.ahuja
-date: 2015-06-03
+date: 2015-06-12
 providers:
   - name: tr-winrm-ne
     title: TR WinRM
@@ -24,6 +24,13 @@ providers:
         type: String
         required: true
         default: 'powershell -noprofile -noninteractive'
+      - name: https
+        title: HTTPS or HTTP
+        description: "to connect on port 5986 over HTTPS, or on port 5985 over HTTP (unencrypted, plaintext password transmission)"
+        type: Select
+        required: true
+        default: HTTPS
+        values: "HTTPS,HTTP"
   - name: tr-winrm-fc
     title: TR WinRM
     service: FileCopier
@@ -38,3 +45,10 @@ providers:
         type: Integer
         required: true
         default: 60
+      - name: https
+        title: HTTPS or HTTP
+        description: "to connect on port 5986 over HTTPS, or on port 5985 over HTTP (unencrypted, plaintext password transmission)"
+        type: Select
+        required: true
+        default: HTTPS
+        values: "HTTPS,HTTP"

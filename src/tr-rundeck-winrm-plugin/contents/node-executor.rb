@@ -4,6 +4,8 @@ require 'optparse'
 $stdout.sync = true
 $stderr.sync = true
 
+_ec = 254
+
 options = {}
 OptionParser.new do |opts|
   opts.on("-h <hostname>", "--hostname=<hostname>", "Remote Hostname") do |hostname|
@@ -36,6 +38,10 @@ winrm_username = options[:username]
 winrm_password = options[:password]
 winrm_timeout = ENV['RD_CONFIG_OPERATION_TIMEOUT'].dup.to_i
 
+winrm_scheme = ENV['RD_CONFIG_HTTPS'] == 'HTTP' ? 'http' : 'https'
+winrm_port = ENV['RD_CONFIG_HTTPS'] == 'HTTP' ? '5985' : '5986'
+winrm_transport = ENV['RD_CONFIG_HTTPS'] == 'HTTP' ? :plaintext : :ssl
+
 if ENV.has_key?('RD_NODE_USERNAME') and ENV['RD_NODE_USERNAME'] =~ /^\${(.*)}$/
   user_in_env_key = 'RD_' + ENV['RD_NODE_USERNAME'].match(/^\${(.*)}$/).captures[0].gsub(/[^a-zA-Z0-9_]/, '_').upcase
   if ! ENV[user_in_env_key].empty?
@@ -50,23 +56,27 @@ if ENV.has_key?('RD_NODE_WINRM_PASSWORD_OPTION')
   end
 end
 
-winrm_uri = "https://#{options[:hostname]}:5986/wsman"
+winrm_uri = "#{winrm_scheme}://#{options[:hostname]}:#{winrm_port}/wsman"
 
-winrm_conn = WinRM::WinRMWebService.new(winrm_uri, :ssl, :user => winrm_username, :pass => winrm_password, :disable_sspi => true, :ca_trust_path => '/etc/pki/tls/certs/')
+winrm_conn = WinRM::WinRMWebService.new(winrm_uri, winrm_transport, :user => winrm_username, :pass => winrm_password, :disable_sspi => true, :ca_trust_path => '/etc/pki/tls/certs/')
 
 winrm_conn.set_timeout(winrm_timeout)
 
-winrm_exec = winrm_conn.run_powershell_script(options[:command])
+begin
+  winrm_exec = winrm_conn.run_powershell_script(options[:command])
 
-winrm_exec[:data].each do |output|
-  if output.has_key?(:stdout)
-    $stdout.puts output[:stdout]
-    $stdout.flush
-  elsif output.has_key?(:stderr)
-    $stderr.puts output[:stderr]
-    $stderr.flush
+  winrm_exec[:data].each do |output|
+    if output.has_key?(:stdout)
+      $stdout.puts output[:stdout]
+    elsif output.has_key?(:stderr)
+      $stderr.puts output[:stderr]
+    end
   end
+
+  _ec = winrm_exec[:exitcode]
+rescue Exception => e
+  $stderr.puts e.message
+  _ec = 253
 end
 
-exit winrm_exec[:exitcode]
-
+exit _ec
