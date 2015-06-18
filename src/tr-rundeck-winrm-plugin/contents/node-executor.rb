@@ -64,15 +64,6 @@ winrm_conn.set_timeout(winrm_timeout)
 
 begin
   winrm_exec = winrm_conn.run_powershell_script(options[:command])
-
-  winrm_exec[:data].each do |output|
-    if output.has_key?(:stdout)
-      $stdout.puts output[:stdout]
-    elsif output.has_key?(:stderr)
-      $stderr.puts output[:stderr]
-    end
-  end
-
   _ec = winrm_exec[:exitcode]
 rescue Exception => e
   $stderr.puts e.message

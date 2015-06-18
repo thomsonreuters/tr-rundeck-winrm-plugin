@@ -2,7 +2,7 @@
 
 set -e
 
-var_version="0.1.2"
+var_version="0.3.0"
 
 var_ruby_version="2.0.0-p645"
 var_pkg_maintner="dhruv.ahuja@thomsonreuters.com"
@@ -13,7 +13,7 @@ var_bin_path="/usr/local/bin"
 
 var_bins=""
 
-rm -rf ${var_prefix}
+rm --recursive --force ${var_prefix}
 mkdir --parents ${var_prefix}
 mkdir --parents ${var_rundeck_libext}
 
@@ -29,6 +29,11 @@ chown -R packager:packager ${var_prefix}
 su --login packager --command="cd ruby-${var_ruby_version} && make install"
 
 su --login packager --command="export PATH=${var_prefix}/bin:${PATH} && gem install --no-document winrm-fs"
+
+for _patchfile in src/patches/*; do
+  _patchfile_abs=$(readlink --canonicalize --no-newline ${_patchfile})
+  patch --strip=0 --input=${_patchfile_abs} --directory=${var_prefix}/lib/ruby/gems/2.0.0/gems
+done
 
 rm --force /tmp/tr-rundeck-winrm-plugin.zip
 cd src/

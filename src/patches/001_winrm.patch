@@ -1,0 +1,38 @@
+--- winrm-1.3.3/lib/winrm/output.rb
++++ winrm-1.3.3/lib/winrm/output.rb
+@@ -22,6 +22,24 @@
+       self[:data] = []
+     end
+
++    def push_data(value)
++      if value.has_key?(:stdout)
++        value[:stdout].gsub!(/(.*)\r\n$/, '\1')
++      end
++      if value.has_key?(:stderr)
++        value[:stderr].gsub!(/(.*)\r\n$/, '\1')
++      end
++
++      self[:data] << value
++
++      if value.has_key?(:stdout) and ! value[:stdout].empty?
++        $stdout.puts value[:stdout]
++      end
++      if value.has_key?(:stderr) and ! value[:stderr].empty?
++        $stderr.puts value[:stderr]
++      end
++    end
++
+     def output
+       self[:data].flat_map do | line |
+         [line[:stdout], line[:stderr]]
+--- winrm-1.3.3/lib/winrm/winrm_service.rb
++++ winrm-1.3.3/lib/winrm/winrm_service.rb
+@@ -233,7 +233,7 @@
+         REXML::XPath.match(resp_doc, "//#{NS_WIN_SHELL}:Stream").each do |n|
+           next if n.text.nil? || n.text.empty?
+           stream = { n.attributes['Name'].to_sym => Base64.decode64(n.text) }
+-          output[:data] << stream
++          output.push_data stream
+           yield stream[:stdout], stream[:stderr] if block_given?
+         end
+
