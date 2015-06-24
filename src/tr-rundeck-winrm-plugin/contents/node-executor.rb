@@ -24,7 +24,7 @@ end.parse!
 
 options.each {|k, v| options[k] = (v.start_with? "'" and v.end_with? "'") ? v[1,v.length-2].strip.chomp : v.strip.chomp}
 
-options[:command].sub!(/^(chmod \+x )(\${env:TEMP}\/.*)$/, '# get-itemproperty -path \2')
+options[:command].sub!(/^(chmod.*)$/, '')
 options[:command].sub!(/^(\${env:TEMP}\/.*\.ps1)$/, 'Get-Content \1 | ' + ENV['RD_CONFIG_INVOCATION_STRING'] + ' -')
 
 if ENV['RD_JOB_LOGLEVEL'] == "DEBUG" and options[:command] =~ /^(rm -f )(\${env:TEMP}\/.*)$/
@@ -58,7 +58,7 @@ end
 
 winrm_uri = "#{winrm_scheme}://#{options[:hostname]}:#{winrm_port}/wsman"
 
-winrm_conn = WinRM::WinRMWebService.new(winrm_uri, winrm_transport, :user => winrm_username, :pass => winrm_password, :disable_sspi => true, :ca_trust_path => '/etc/pki/tls/certs/')
+winrm_conn = WinRM::WinRMWebService.new(winrm_uri, winrm_transport, :user => winrm_username, :pass => winrm_password, :disable_sspi => true, :ca_trust_path => '/etc/pki/tls/certs/', :no_ssl_peer_verification => true)
 
 winrm_conn.set_timeout(winrm_timeout)
 
