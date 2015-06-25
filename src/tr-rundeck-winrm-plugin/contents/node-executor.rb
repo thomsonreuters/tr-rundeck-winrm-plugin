@@ -24,7 +24,7 @@ end.parse!
 
 options.each {|k, v| options[k] = (v.start_with? "'" and v.end_with? "'") ? v[1,v.length-2].strip.chomp : v.strip.chomp}
 
-options[:command].sub!(/^(chmod \+x )(\${env:TEMP}\/.*)$/, '# get-itemproperty -path \2')
+options[:command].sub!(/^(chmod )(\+x )?(\${env:TEMP}\/.*)$/, '# get-itemproperty -path \3')
 options[:command].sub!(/^(\${env:TEMP}\/.*\.ps1)$/, 'Get-Content \1 | ' + ENV['RD_CONFIG_INVOCATION_STRING'] + ' -')
 
 if ENV['RD_JOB_LOGLEVEL'] == "DEBUG" and options[:command] =~ /^(rm -f )(\${env:TEMP}\/.*)$/
@@ -37,6 +37,7 @@ end
 winrm_username = options[:username]
 winrm_password = options[:password]
 winrm_timeout = ENV['RD_CONFIG_OPERATION_TIMEOUT'].dup.to_i
+winrm_cert_trust_enforce = ENV['RD_NODE_WINRM_CERT_TRUST_MODE_OPTION'] == 'true'
 
 winrm_scheme = ENV['RD_CONFIG_HTTPS'] == 'HTTP' ? 'http' : 'https'
 winrm_port = ENV['RD_CONFIG_HTTPS'] == 'HTTP' ? '5985' : '5986'
@@ -58,12 +59,23 @@ end
 
 winrm_uri = "#{winrm_scheme}://#{options[:hostname]}:#{winrm_port}/wsman"
 
-winrm_conn = WinRM::WinRMWebService.new(winrm_uri, winrm_transport, :user => winrm_username, :pass => winrm_password, :disable_sspi => true, :ca_trust_path => '/etc/pki/tls/certs/')
+winrm_conn = WinRM::WinRMWebService.new(winrm_uri, winrm_transport, :user => winrm_username, :pass => winrm_password, :disable_sspi => true, :ca_trust_path => '/etc/pki/tls/certs/', :no_ssl_peer_verification => !winrm_cert_trust_enforce)
 
 winrm_conn.set_timeout(winrm_timeout)
 
 begin
   winrm_exec = winrm_conn.run_powershell_script(options[:command])
+
+  winrm_exec[:data].each do |output|
+    if output.has_key?(:stdout)
+      $stdout.puts output[:stdout]
+      $stdout.flush
+    elsif output.has_key?(:stderr)
+      $stderr.puts output[:stderr]
+      $stderr.flush
+    end
+  end
+
   _ec = winrm_exec[:exitcode]
 rescue Exception => e
   $stderr.puts e.message
