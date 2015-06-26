@@ -68,10 +68,10 @@ begin
 
   winrm_exec[:data].each do |output|
     if output.has_key?(:stdout)
-      $stdout.puts output[:stdout]
+      $stdout.print output[:stdout]
       $stdout.flush
     elsif output.has_key?(:stderr)
-      $stderr.puts output[:stderr]
+      $stderr.print output[:stderr]
       $stderr.flush
     end
   end
