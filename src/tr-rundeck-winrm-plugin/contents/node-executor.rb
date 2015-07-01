@@ -24,14 +24,19 @@ end.parse!
 
 options.each {|k, v| options[k] = (v.start_with? "'" and v.end_with? "'") ? v[1,v.length-2].strip.chomp : v.strip.chomp}
 
-options[:command].sub!(/^(chmod \+x )(\${env:TEMP}\/.*)$/, '# get-itemproperty -path \2')
-options[:command].sub!(/^(\${env:TEMP}\/.*\.ps1)$/, 'Get-Content \1 | ' + ENV['RD_CONFIG_INVOCATION_STRING'] + ' -')
+options[:command].sub!(/^(chmod \+x )(\${env:TEMP}\/.*)$/, '# Get-ItemProperty -path \2')
+options[:command].sub!(/^(rm -f|del) (\${env:TEMP}\/.*)$/, '# Remove-Item -path \2')
 
-if ENV['RD_JOB_LOGLEVEL'] == "DEBUG" and options[:command] =~ /^(rm -f )(\${env:TEMP}\/.*)$/
-  options[:command].sub!(/^(rm -f )(\${env:TEMP}\/.*)$/, '# remove-item -path \2')
+if options[:command] =~ /^(chmod \+x )(\${env:TEMP}\/.*)$/ or options[:command] =~ /^(rm -f|del) (\${env:TEMP}\/.*)$/
+  _ec = 0
+  exit _ec
+end
+
+if ENV['RD_JOB_LOGLEVEL'] == "DEBUG"
+  options[:command].sub!(/^(\${env:TEMP}\/.*\.ps1)$/, '$__SCRIPT__ = Get-Content \1 ; $__SCRIPT__ | ' + ENV['RD_CONFIG_INVOCATION_STRING'] + ' - ;')
   $stderr.puts "TR Node Executor: Preserved script at remote host in its ${env:TEMP} . See lines above for path."
 else
-  options[:command].sub!(/^(rm -f )(\${env:TEMP}\/.*)$/, 'remove-item -path \2')
+  options[:command].sub!(/^(\${env:TEMP}\/.*\.ps1)$/, '$__SCRIPT__ = Get-Content \1 ; $__SCRIPT__ | ' + ENV['RD_CONFIG_INVOCATION_STRING'] + ' - ; Remove-Item -path \1 ;')
 end
 
 winrm_username = options[:username]
@@ -41,6 +46,7 @@ winrm_timeout = ENV['RD_CONFIG_OPERATION_TIMEOUT'].dup.to_i
 winrm_scheme = ENV['RD_CONFIG_HTTPS'] == 'HTTP' ? 'http' : 'https'
 winrm_port = ENV['RD_CONFIG_HTTPS'] == 'HTTP' ? '5985' : '5986'
 winrm_transport = ENV['RD_CONFIG_HTTPS'] == 'HTTP' ? :plaintext : :ssl
+winrm_cert_invalid = ENV['RD_CONFIG_CERT_VALID'] == 'Enabled' ? false : true
 
 if ENV.has_key?('RD_NODE_USERNAME') and ENV['RD_NODE_USERNAME'] =~ /^\${(.*)}$/
   user_in_env_key = 'RD_' + ENV['RD_NODE_USERNAME'].match(/^\${(.*)}$/).captures[0].gsub(/[^a-zA-Z0-9_]/, '_').upcase
@@ -58,7 +64,9 @@ end
 
 winrm_uri = "#{winrm_scheme}://#{options[:hostname]}:#{winrm_port}/wsman"
 
-winrm_conn = WinRM::WinRMWebService.new(winrm_uri, winrm_transport, :user => winrm_username, :pass => winrm_password, :disable_sspi => true, :ca_trust_path => '/etc/pki/tls/certs/')
+winrm_conn = WinRM::WinRMWebService.new(winrm_uri, winrm_transport, :user => winrm_username, :pass => winrm_password, \
+             :disable_sspi => true, :ca_trust_path => '/etc/pki/tls/certs/', :no_ssl_peer_verification => \
+             winrm_cert_invalid)
 
 winrm_conn.set_timeout(winrm_timeout)
 
