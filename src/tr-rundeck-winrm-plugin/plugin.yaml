@@ -1,8 +1,8 @@
 name: TR WinRM
-version: 0.4.0
+version: 0.4.1
 rundeckPluginVersion: 1.0
 author: dhruv.ahuja
-date: 2015-07-01
+date: 2015-07-02
 providers:
   - name: tr-winrm-ne
     title: TR WinRM

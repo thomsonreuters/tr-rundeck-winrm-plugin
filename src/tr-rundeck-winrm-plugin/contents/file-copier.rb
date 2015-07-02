@@ -27,8 +27,8 @@ end.parse!
 
 options.each {|k, v| options[k] = (v.start_with? "'" and v.end_with? "'") ? v[1,v.length-2].strip.chomp : v.strip.chomp}
 
-options[:target].sub!(/^(C:\\WINDOWS\\TEMP\\)(.*)\.bat$/, '${env:TEMP}/\2.ps1')
-options[:target].sub!(/^(\/tmp\/)(.*)\.sh$/, '${env:TEMP}/\2.ps1')
+options[:target].sub!(/^(C:\\WINDOWS\\TEMP\\)(.*)\.(bat|ps1)$/, '${env:TEMP}/\2.ps1')
+options[:target].sub!(/^(\/tmp\/)(.*)\.(sh|ps1)$/, '${env:TEMP}/\2.ps1')
 
 winrm_username = options[:username]
 winrm_password = options[:password]

@@ -2,7 +2,7 @@
 
 set -e
 
-var_version="0.4.0"
+var_version="0.4.1"
 
 var_ruby_version="2.0.0-p645"
 var_pkg_maintner="dhruv.ahuja@thomsonreuters.com"
