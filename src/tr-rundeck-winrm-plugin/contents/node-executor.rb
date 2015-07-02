@@ -36,7 +36,7 @@ if ENV['RD_JOB_LOGLEVEL'] == "DEBUG"
   options[:command].sub!(/^(\${env:TEMP}\/.*\.ps1)$/, '$__SCRIPT__ = Get-Content \1 ; $__SCRIPT__ | ' + ENV['RD_CONFIG_INVOCATION_STRING'] + ' - ;')
   $stderr.puts "TR Node Executor: Preserved script at remote host in its ${env:TEMP} . See lines above for path."
 else
-  options[:command].sub!(/^(\${env:TEMP}\/.*\.ps1)$/, '$__SCRIPT__ = Get-Content \1 ; $__SCRIPT__ | ' + ENV['RD_CONFIG_INVOCATION_STRING'] + ' - ; Remove-Item -path \1 ;')
+  options[:command].sub!(/^(\${env:TEMP}\/.*\.ps1)$/, '$__SCRIPT__ = Get-Content \1 ; Remove-Item -path \1 ; $__SCRIPT__ | ' + ENV['RD_CONFIG_INVOCATION_STRING'] + ' - ;')
 end
 
 winrm_username = options[:username]
