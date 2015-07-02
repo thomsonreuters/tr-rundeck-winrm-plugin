@@ -27,7 +27,8 @@ options.each {|k, v| options[k] = (v.start_with? "'" and v.end_with? "'") ? v[1,
 options[:command].sub!(/^(chmod \+x )(\${env:TEMP}\/.*)$/, '# Get-ItemProperty -path \2')
 options[:command].sub!(/^(rm -f|del) (\${env:TEMP}\/.*)$/, '# Remove-Item -path \2')
 
-if options[:command] =~ /^(chmod \+x )(\${env:TEMP}\/.*)$/ or options[:command] =~ /^(rm -f|del) (\${env:TEMP}\/.*)$/
+# just exit with 0 on comments trying to run
+if options[:command] =~ /^#/
   _ec = 0
   exit _ec
 end
