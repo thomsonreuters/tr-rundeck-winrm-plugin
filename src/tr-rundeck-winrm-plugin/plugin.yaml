@@ -20,10 +20,10 @@ providers:
         default: 60
       - name: invocation_string
         title: Powershell Invocation String
-        description: to be used as "Get-Content <script.ps1> | <invocation_string> -"
+        description: to be used as "<invocation_string> -EncodedCommand $EncodedCommand"
         type: String
         required: true
-        default: powershell -noprofile -noninteractive
+        default: powershell -NoProfile -NonInteractive -ExecutionPolicy Unrestricted
       - name: https
         title: HTTPS or HTTP
         description: >
