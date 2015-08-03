@@ -32,41 +32,41 @@ def fromapi(par_path)
   var_request = Net::HTTP::Get.new(var_uri.request_uri)
   var_request.initialize_http_header({'User-Agent' => 'curl'})
   var_xml = var_http.request(var_request)
-  
+
   if(var_xml.code.to_i < 200 or var_xml.code.to_i > 299)
     raise var_xml.body
   end
-  
+
   var_xml.body
 end
 
 def toapi(par_path, par_params = Hash.new, par_files = Hash.new)
   var_boundary = Digest::MD5.hexdigest(rand.to_s)
   var_data = ''
-  
+
   par_params.each { |k, v|
     var_data += "--#{var_boundary}\r\ncontent-disposition: form-data; name=\"#{k}\"\r\n\r\n" + "#{v}\r\n"
   }
-  
+
   par_files.each { |k, v|
     var_data += "--#{var_boundary}\r\ncontent-disposition: form-data; name=\"#{k}\"; filename=\"#{k}\"\r\n\r\n" + "#{v}\r\n"
   }
-  
+
   var_data += "--#{var_boundary}--\r\n"
-  
+
   var_uri = URI.parse("#{@opt_rdapi}#{par_path}?authtoken=#{@opt_token}&project=#{@opt_project}")
   var_http = Net::HTTP.new(var_uri.host, var_uri.port)
-  
+
   var_request = Net::HTTP::Post.new(var_uri.request_uri)
   var_request.initialize_http_header({'User-Agent' => 'curl'})
   var_request.body = var_data
   var_request['content-type'] = "multipart/form-data; boundary=#{var_boundary}"
-  
+
   var_xml = var_http.request(var_request)
-  
+
   if(var_xml.code.to_i < 200 or var_xml.code.to_i > 299)
     raise var_xml.body
   end
-  
+
   var_xml.body
 end

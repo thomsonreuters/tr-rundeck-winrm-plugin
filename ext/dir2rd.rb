@@ -39,19 +39,17 @@ def jobsxml2rd(jobsxml)
 
   var_files['xmlBatch'] = jobsxml.to_s
 
-  toapi('/1/jobs/import', var_params, var_files)
-
   if @opt_exclusive
     jobstree = rdjobs2tree
     rd_job_uuids = Set.new
 
     jobstree.each { |group, jobs|
-    jobs.each { |job_name, job_xml|
-      rd_job_uuids.add(job_xml.elements['job/uuid'].text)
+      jobs.each { |job_name, job_xml|
+        rd_job_uuids.add(job_xml.elements['job/uuid'].text)
+      }
     }
-  }
 
-  excess_job_uuids = rd_job_uuids - @dir_job_uuids
+    excess_job_uuids = rd_job_uuids - @dir_job_uuids
 
     if ! excess_job_uuids.empty?
       var_params['idlist'] = excess_job_uuids.to_a.join(',')
@@ -59,6 +57,8 @@ def jobsxml2rd(jobsxml)
       toapi('/5/jobs/delete',  var_params)
     end
   end
+
+  toapi('/1/jobs/import', var_params, var_files)
 end
 
 if __FILE__==$0

@@ -4,23 +4,23 @@ require File.join(File.dirname(__FILE__), 'rd-scm.rb')
 
 def rd2dir_init
   if @opt_exclusive
-    if ! Dir["#{@opt_store}/#{@opt_project}/**"].empty?
-      raise "#{@opt_store}/#{@opt_project} is NOT empty. Cannot continue with exclusivity."
+    if ! Dir["#{@opt_store}//**"].empty?
+      raise "#{@opt_store}/ is NOT empty. Cannot continue with exclusivity."
     end
   end
 
-  if ! File.exists?("#{@opt_store}/#{@opt_project}")
-    FileUtils.mkdir_p("#{@opt_store}/#{@opt_project}")
+  if ! File.exists?("#{@opt_store}")
+    FileUtils.mkdir_p("#{@opt_store}")
   end
 end
 
 def rdjobs2tree
   tree = Hash.new
   tree['/'] = Hash.new
-  
-  project_jobs = fromapi('/1/jobs/export')  
+
+  project_jobs = fromapi('/1/jobs/export')
   xml_tree = REXML::Document.new(project_jobs)
-  
+
   xml_tree.elements.each('/joblist/job') { |xml_job|
     if xml_job.elements['group']
       jobdir = xml_job.elements['group'].text
@@ -41,7 +41,7 @@ end
 
 def jobstree2dir(jobstree)
   jobstree.each { |subdir, jobs|
-    abs_subdir = "#{@opt_store}/#{@opt_project}/#{subdir}"
+    abs_subdir = "#{@opt_store}/#{subdir}"
     if ! File.exists?(abs_subdir)
       FileUtils.mkdir_p(abs_subdir)
     end
