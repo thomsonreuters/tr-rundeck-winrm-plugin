@@ -28,10 +28,12 @@ def fromapi(par_path)
   var_http = Net::HTTP.new(var_uri.host, var_uri.port)
   var_request = Net::HTTP::Get.new(var_uri.request_uri)
   var_request.initialize_http_header({'User-Agent' => 'curl'})
+  puts "Beginning GET from Rundeck API..."
   var_xml = var_http.request(var_request)
   if(var_xml.code.to_i < 200 or var_xml.code.to_i > 299)
     raise var_xml.body
   end
+  puts "Returning results from Rundeck API."
   var_xml.body
 end
 
@@ -51,9 +53,11 @@ def toapi(par_path, par_params = Hash.new, par_files = Hash.new)
   var_request.initialize_http_header({'User-Agent' => 'curl'})
   var_request.body = var_data
   var_request['content-type'] = "multipart/form-data; boundary=#{var_boundary}"
+  puts "Beginning POST to Rundeck API..."
   var_xml = var_http.request(var_request)
   if(var_xml.code.to_i < 200 or var_xml.code.to_i > 299)
     raise var_xml.body
   end
+  puts "Returning results from Rundeck API."
   var_xml.body
 end
