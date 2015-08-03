@@ -1,11 +1,13 @@
 #!/usr/bin/ruby
+
 require File.join(File.dirname(__FILE__), 'rd-scm.rb')
 
 def rd2dir_init
   if @opt_exclusive
     puts "Checking if directory #{@opt_store} is empty..."
     if ! Dir["#{@opt_store}//**"].empty?
-      raise "#{@opt_store}/ is NOT empty. Cannot continue with exclusivity."
+      $stderr.puts "#{@opt_store}/ is NOT empty. Cannot continue with exclusivity."
+      exit 250
     end
   end
   if ! File.exists?("#{@opt_store}")
@@ -55,7 +57,12 @@ def jobstree2dir(jobstree)
 end
 
 if __FILE__==$0
-  rd2dir_init
-  jobstree = rdjobs2tree
-  jobstree2dir(jobstree)
+  begin
+    rd2dir_init
+    jobstree = rdjobs2tree
+    jobstree2dir(jobstree)
+  rescue Exception => e
+    $stderr.puts e.message
+    exit 253
+  end
 end

@@ -1,4 +1,5 @@
 #!/usr/bin/ruby
+
 require 'digest/md5'
 require 'fileutils'
 require 'net/http'
@@ -13,14 +14,24 @@ require 'pp'
 @xml_formatter = REXML::Formatters::Pretty.new(2, true)
 @xml_formatter.compact = true
 
-OptionParser.new do |option|
+op = OptionParser.new do |option|
   option.on('-p', '--project NAME', 'NAME of the Rundeck project') { |x| @opt_project = x }
   option.on('-k', '--token TOKEN', 'Rundeck API Token') { |x| @opt_token = x }
-  option.on('-r', '--rundeck API', 'The Rundeck API URL') { |x| @opt_rdapi = x }
+  option.on('-r', '--rundeck API', 'The Rundeck API URL (eg http://x.y.z:8080/api)') { |x| @opt_rdapi = x }
   option.on('-s', '--store PATH', 'Path to the storage, may be a URL or a Path depending on invocation') { |x| @opt_store = x }
   option.on('-x', '--exclusive', 'Ensures, or errors, that the target should exlusively contain contents from the source') { |x| @opt_exclusive = true }
-  option.on('-h', '--help', 'Print this help message') { puts option; exit 127; }
+  option.on('-h', '--help', 'Print this help message') { puts option; exit 252; }
   option.parse!
+end
+
+def l7error(http_code, http_body)
+  $stderr.puts "Rundeck API returned an HTTP #{http_code} ."
+  err_log = Tempfile.new(File.basename($0, File.extname($0)) + '_')
+  err_log.write(http_body)
+  err_log.close
+  File.rename(err_log.path, err_log.path + '.html')
+  $stderr.puts "Error log dumped at #{err_log.path}.html ."
+  exit 253
 end
 
 def fromapi(par_path)
@@ -31,7 +42,7 @@ def fromapi(par_path)
   puts "Beginning GET from Rundeck API..."
   var_xml = var_http.request(var_request)
   if(var_xml.code.to_i < 200 or var_xml.code.to_i > 299)
-    raise var_xml.body
+    l7error(var_xml.code.to_i, var_xml.body)
   end
   puts "Returning results from Rundeck API."
   var_xml.body
@@ -56,8 +67,13 @@ def toapi(par_path, par_params = Hash.new, par_files = Hash.new)
   puts "Beginning POST to Rundeck API..."
   var_xml = var_http.request(var_request)
   if(var_xml.code.to_i < 200 or var_xml.code.to_i > 299)
-    raise var_xml.body
+    l7error(var_xml.code.to_i, var_xml.body)
   end
   puts "Returning results from Rundeck API."
   var_xml.body
+end
+
+if @opt_project.empty? or @opt_token.empty? or @opt_rdapi.empty? or @opt_store.empty?
+  $stderr.puts op
+  exit 251
 end

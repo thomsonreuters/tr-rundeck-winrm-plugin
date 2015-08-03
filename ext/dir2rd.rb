@@ -1,4 +1,5 @@
 #!/usr/bin/ruby
+
 require File.join(File.dirname(__FILE__), 'rd-scm.rb')
 require File.join(File.dirname(__FILE__), 'rd2dir.rb')
 
@@ -63,6 +64,11 @@ def jobsxml2rd(jobsxml)
 end
 
 if __FILE__==$0
-  jobsxml = dir2jobsxml
-  jobsxml2rd(jobsxml)
+  begin
+    jobsxml = dir2jobsxml
+    jobsxml2rd(jobsxml)
+  rescue Exception => e
+    $stderr.puts e.message
+    exit 249
+  end
 end
