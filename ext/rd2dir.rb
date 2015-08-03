@@ -1,26 +1,25 @@
 #!/usr/bin/ruby
-
 require File.join(File.dirname(__FILE__), 'rd-scm.rb')
 
 def rd2dir_init
   if @opt_exclusive
+    puts "Checking if directory #{@opt_store} is empty..."
     if ! Dir["#{@opt_store}//**"].empty?
       raise "#{@opt_store}/ is NOT empty. Cannot continue with exclusivity."
     end
   end
-
   if ! File.exists?("#{@opt_store}")
     FileUtils.mkdir_p("#{@opt_store}")
+    puts "Created directory #{@opt_store} ."
   end
 end
 
 def rdjobs2tree
   tree = Hash.new
   tree['/'] = Hash.new
-
+  job_count = 0
   project_jobs = fromapi('/1/jobs/export')
   xml_tree = REXML::Document.new(project_jobs)
-
   xml_tree.elements.each('/joblist/job') { |xml_job|
     if xml_job.elements['group']
       jobdir = xml_job.elements['group'].text
@@ -30,12 +29,12 @@ def rdjobs2tree
     else
       jobdir = '/'
     end
-
     job_wrap = REXML::Element.new('joblist')
     job_wrap.add_element(xml_job)
     tree[jobdir][xml_job.elements['name'].text] = job_wrap
+    job_count += 1
   }
-
+  puts "Extracted #{job_count} jobs from Rundeck API."
   tree
 end
 
@@ -45,7 +44,6 @@ def jobstree2dir(jobstree)
     if ! File.exists?(abs_subdir)
       FileUtils.mkdir_p(abs_subdir)
     end
-
     jobs.each { |job_name, job_xml|
       abs_job_file = "#{abs_subdir}/#{job_name}.xml"
       xml_handle = File.open(abs_job_file, 'w')
@@ -53,6 +51,7 @@ def jobstree2dir(jobstree)
       xml_handle.close
     }
   }
+  puts "Jobs' files written in #{@opt_store} ."
 end
 
 if __FILE__==$0
