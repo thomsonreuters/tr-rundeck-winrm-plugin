@@ -1,6 +1,5 @@
 #!/usr/bin/ruby
 
-require File.join(File.dirname(__FILE__), 'rd-scm.rb')
 require File.join(File.dirname(__FILE__), 'rd2dir.rb')
 
 def dir2jobsxml
