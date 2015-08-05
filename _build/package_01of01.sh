@@ -55,7 +55,7 @@ chmod a+x ${var_bins}
 
 cd rpm/
 
-fpm -t rpm -s dir --name tr-rundeck-winrm-plugin --force --maintainer ${var_pkg_maintner} --version ${var_version} ${var_prefix} ${var_rundeck_libext}/tr-rundeck-winrm-plugin.zip ${var_bins}
+fpm -t rpm -s dir --name tr-rundeck-winrm-plugin --depends rundeck --depends unix2dos --force --maintainer ${var_pkg_maintner} --version ${var_version} ${var_prefix} ${var_rundeck_libext}/tr-rundeck-winrm-plugin.zip ${var_bins}
 
 cd -
 
