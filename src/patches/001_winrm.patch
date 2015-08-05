@@ -15,7 +15,7 @@
 +      self[:data] << value
 +
 +      if value.has_key?(:stdout) and ! value[:stdout].empty?
-+        $stdout.puts value[:stdout]
++        $stdout.print value[:stdout]
 +      end
 +      if value.has_key?(:stderr) and ! value[:stderr].empty?
 +        $stderr.puts value[:stderr]

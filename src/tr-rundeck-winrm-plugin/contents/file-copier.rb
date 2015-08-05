@@ -30,6 +30,10 @@ options.each {|k, v| options[k] = (v.start_with? "'" and v.end_with? "'") ? v[1,
 options[:target].sub!(/^(C:\\WINDOWS\\TEMP\\)(.*)\.(bat|ps1)$/, '${env:TEMP}/\2.ps1')
 options[:target].sub!(/^(\/tmp\/)(.*)\.(sh|ps1)$/, '${env:TEMP}/\2.ps1')
 
+if options[:source] =~ /\/var\/lib\/rundeck\/var\/tmp\/dispatch[\d]*\.tmp/ and options[:target] =~ /\.ps1$/
+  system("unix2dos --oldfile #{options[:source]} 1> /dev/null 2> /dev/null")
+end
+
 winrm_username = options[:username]
 winrm_password = options[:password]
 winrm_timeout = ENV['RD_CONFIG_OPERATION_TIMEOUT'].dup.to_i
