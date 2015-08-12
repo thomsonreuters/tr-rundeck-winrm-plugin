@@ -4,21 +4,13 @@
        self[:data] = []
      end
 
-+    def push_data(value)
-+      if value.has_key?(:stdout)
-+        value[:stdout].gsub!(/(.*)\r\n$/, '\1')
-+      end
-+      if value.has_key?(:stderr)
-+        value[:stderr].gsub!(/(.*)\r\n$/, '\1')
-+      end
-+
 +      self[:data] << value
 +
-+      if value.has_key?(:stdout) and ! value[:stdout].empty?
++      if value.has_key?(:stdout)
 +        $stdout.print value[:stdout]
 +      end
-+      if value.has_key?(:stderr) and ! value[:stderr].empty?
-+        $stderr.puts value[:stderr]
++      if value.has_key?(:stderr)
++        $stderr.print value[:stderr]
 +      end
 +    end
 +
@@ -35,4 +27,3 @@
 +          output.push_data stream
            yield stream[:stdout], stream[:stderr] if block_given?
          end
-
