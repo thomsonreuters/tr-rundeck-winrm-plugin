@@ -2,9 +2,9 @@
 
 set -e
 
-var_version="0.7.1"
+var_version="0.8.0"
 
-var_ruby_version="2.0.0-p645"
+var_ruby_version="2.0.0-p647"
 var_pkg_maintner="dhruv.ahuja@thomsonreuters.com"
 
 var_prefix="/opt/tr-rundeck-winrm-plugin"
@@ -55,7 +55,9 @@ chmod a+x ${var_bins}
 
 cd rpm/
 
-fpm -t rpm -s dir --name tr-rundeck-winrm-plugin --depends rundeck --depends unix2dos --force --maintainer ${var_pkg_maintner} --version ${var_version} ${var_prefix} ${var_rundeck_libext}/tr-rundeck-winrm-plugin.zip ${var_bins}
+fpm -t rpm -s dir --name tr-rundeck-winrm-plugin --depends rundeck --depends unix2dos --depends file --depends libyaml \
+   --force --maintainer ${var_pkg_maintner} --version ${var_version} \
+   ${var_prefix} ${var_rundeck_libext}/tr-rundeck-winrm-plugin.zip ${var_bins}
 
 cd -
 

@@ -1,8 +1,8 @@
 name: TR WinRM
-version: 0.7.1
+version: 0.8.0
 rundeckPluginVersion: 1.0
 author: dhruv.ahuja
-date: 2015-08-12
+date: 2015-09-14
 providers:
   - name: tr-winrm-ne
     title: TR WinRM
@@ -20,10 +20,10 @@ providers:
         default: 60
       - name: invocation_string
         title: Powershell Invocation String
-        description: to be used as "<invocation_string> -EncodedCommand $EncodedCommand"
+        description: to be used as "$script = Get-Content <path-to-script>; $script | Out-String | <invocation-string> -"
         type: String
         required: true
-        default: powershell -NoProfile -NonInteractive -ExecutionPolicy Unrestricted
+        default: powershell -NoProfile -NonInteractive
       - name: https
         title: HTTPS or HTTP
         description: >
