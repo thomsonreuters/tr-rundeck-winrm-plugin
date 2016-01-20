@@ -11,12 +11,16 @@ def dir2jobsxml
     job_xml = REXML::Document.new(File.read(xml_file))
     job_xml = job_xml.elements['joblist/job']
     @dir_job_uuids.add(job_xml.elements['uuid'].text)
-    project_name_old = job_xml.elements['context'].elements['project'].text
-    project_name_new = @opt_project
-    if project_name_old != project_name_new
-      job_xml.delete_element(job_xml.elements['id'])
-      job_xml.delete_element(job_xml.elements['uuid'])
-      job_xml.elements['context'].elements['project'].text = @opt_project
+    begin
+      project_name_old = job_xml.elements['context'].elements['project'].text
+      project_name_old = '_cant_find_out'
+      project_name_new = @opt_project
+      if project_name_old != project_name_new
+        job_xml.delete_element(job_xml.elements['id'])
+        job_xml.delete_element(job_xml.elements['uuid'])
+        job_xml.elements['context'].elements['project'].text = @opt_project
+      end
+    rescue
     end
     jobsxml.add_element(job_xml)
     job_count += 1
@@ -33,7 +37,7 @@ def jobsxml2rd(jobsxml)
   var_params['project'] = @opt_project
   var_params['uuidOption'] = 'preserve'
   var_files['xmlBatch'] = jobsxml.to_s
-  imported_jobs = toapi('/1/jobs/import', var_params, var_files)
+  imported_jobs = toapi("/14/project/#{@opt_project}/jobs/import", var_params, var_files)
   xml_tree = REXML::Document.new(imported_jobs)
   imported_job_uuids = Set.new
   xml_tree.elements.each('/result/succeeded/job') { |xml_job|
