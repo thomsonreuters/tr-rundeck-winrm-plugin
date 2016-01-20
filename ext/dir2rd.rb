@@ -35,7 +35,7 @@ def jobsxml2rd(jobsxml)
   var_params['format'] = 'xml'
   var_params['dupeOption'] = 'update'
   var_params['project'] = @opt_project
-  var_params['uuidOption'] = 'preserve'
+  var_params['uuidOption'] = 'remove'
   var_files['xmlBatch'] = jobsxml.to_s
   imported_jobs = toapi("/14/project/#{@opt_project}/jobs/import", var_params, var_files)
   xml_tree = REXML::Document.new(imported_jobs)
